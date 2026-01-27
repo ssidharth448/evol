@@ -28,13 +28,19 @@ function App() {
   return (
     <div
       style={{
-        padding: "2rem",
+        width: "100vw",
         fontFamily: "'Courier New', Courier, monospace",
         backgroundColor: "#f2f2f2",
         minHeight: "100vh",
       }}
-    >
-      <h1 style={{ textAlign: "center" }}>evol</h1>
+    ><div
+    style={{
+      maxWidth: "900px",
+      margin: "0 auto",
+      padding: "2rem",
+    }}>
+      
+      <h1 style={{ textAlign: "center", color: "#000"}}>evol</h1>
       <p style={{ textAlign: "center" }}>Collect words you love</p>
 
       {/* Form */}
@@ -73,6 +79,7 @@ function App() {
           <WordCard key={index} {...w} />
         ))}
       </div>
+    </div>
     </div>
   );
 }

@@ -16,13 +16,30 @@ function App() {
     localStorage.setItem("words", JSON.stringify(words));
   }, [words]);
 
-  const handleAddWord = (e) => {
+  const handleAddWord = async (e) => {
     e.preventDefault();
     if (!newWord) return;
-
-    setWords([...words, { word: newWord, meaning: newMeaning }]);
-    setNewWord("");
-    setNewMeaning("");
+  
+    try {
+      const res = await fetch(
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${newWord}`
+      );
+      const data = await res.json();
+  
+      const meaning =
+        data[0]?.meanings[0]?.definitions[0]?.definition ||
+        "No meaning found";
+  
+      setWords([...words, { word: newWord, meaning }]);
+      setNewWord("");
+      setNewMeaning("");
+    } catch (error) {
+      console.error("Error fetching meaning:", error);
+    }
+  };
+  const handleDelete = (indexToDelete) => {
+    const updatedWords = words.filter((_, index) => index !== indexToDelete);
+    setWords(updatedWords);
   };
 
   return (
@@ -35,12 +52,12 @@ function App() {
       }}
     ><div
     style={{
-      maxWidth: "900px",
-      margin: "0 auto",
+      Width: "100%",
       padding: "2rem",
     }}>
       
       <h1 style={{ textAlign: "center", color: "#000"}}>evol</h1>
+      <h3 style={{ textAlign: "center", color: "#000"}}>Words hold words, hold words from meaning</h3>
       <p style={{ textAlign: "center" }}>Collect words you love</p>
 
       {/* Form */}
@@ -70,14 +87,19 @@ function App() {
       {/* Polaroid Cards */}
       <div
         style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+          gap: "20px",
+          width: "100%",
         }}
       >
         {words.map((w, index) => (
-          <WordCard key={index} {...w} />
-        ))}
+  <WordCard
+    key={index}
+    {...w}
+    onDelete={() => handleDelete(index)}
+  />
+))}
       </div>
     </div>
     </div>

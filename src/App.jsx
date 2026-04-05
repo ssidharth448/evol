@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import WordCard from "./components/WordCard";
-import { SignedIn, SignedOut, UserButton, SignOutButton, useUser } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, UserButton, SignOutButton, useUser, useAuth } from "@clerk/clerk-react";
 import { supabase } from "./supabaseClient";
-
+import { Navigate } from "react-router-dom";
 function App() {
+  const { isLoaded } = useAuth();
   const { user } = useUser();
   const [words, setWords] = useState([]);
   const [newWord, setNewWord] = useState("");
@@ -24,6 +25,9 @@ function App() {
     };
     fetchWords();
   }, [user]);
+
+  // NOW it's safe to return early — all hooks are above this
+  if (!isLoaded) return null;
 
   const handleAddWord = async (e) => {
     e.preventDefault();
@@ -80,11 +84,8 @@ function App() {
     <>
       {/* NOT LOGGED IN */}
       <SignedOut>
-        <div style={{ textAlign: "center", marginTop: "5rem" }}>
-          <h2>Please sign in</h2>
-          <a href="/sign-in">Go to login</a>
-        </div>
-      </SignedOut>
+  <Navigate to="/sign-in" replace />
+</SignedOut>
 
       {/* LOGGED IN */}
       <SignedIn>
@@ -94,7 +95,7 @@ function App() {
             minHeight: "100vh",
             position: "relative",
             fontFamily: "'Courier New', Courier, monospace",
-            background: "linear-gradient(135deg, rgb(251, 251, 251), rgb(231, 231, 231))",
+            background: "linear-gradient(135deg, rgb(255, 253, 246), rgb(231, 231, 231))",
           }}
         >
           <div style={{ position: "absolute", top: 20, right: 20, display: "flex", alignItems: "center", gap: "0.75rem" }}>

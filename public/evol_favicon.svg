@@ -1,4 +1,4 @@
-<svg width="100%" viewBox="190 190 300 300" xmlns="http://www.w3.org/2000/svg">
-  <rect x="190" y="190" width="300" height="300" rx="60" fill="#1a1a1a"/>
-  <text x="340" y="375" text-anchor="middle" font-family="'Courier New', Courier, monospace" font-size="120" font-weight="400" fill="#f5f0e8">evol</text>
+<svg width="100%" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="300" height="300" rx="60" fill="#1a1a1a"/>
+  <text x="150" y="195" text-anchor="middle" font-family="'Courier New', Courier, monospace" font-size="120" font-weight="400" fill="#f5f0e8">evol</text>
 </svg>

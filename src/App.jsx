@@ -3,6 +3,7 @@ import WordCard from "./components/WordCard";
 import { SignedIn, SignedOut, UserButton, SignOutButton, useUser, useAuth } from "@clerk/clerk-react";
 import { supabase } from "./supabaseClient";
 import { Navigate } from "react-router-dom";
+
 function App() {
   const { isLoaded } = useAuth();
   const { user } = useUser();
@@ -12,7 +13,8 @@ function App() {
   const [options, setOptions] = useState([]);
   const [pendingWord, setPendingWord] = useState("");
 
-  // Fetch words from Supabase on load
+  const isMobile = window.innerWidth <= 768;
+
   useEffect(() => {
     if (!user) return;
     const fetchWords = async () => {
@@ -26,7 +28,6 @@ function App() {
     fetchWords();
   }, [user]);
 
-  // NOW it's safe to return early — all hooks are above this
   if (!isLoaded) return null;
 
   const handleAddWord = async (e) => {
@@ -82,12 +83,10 @@ function App() {
 
   return (
     <>
-      {/* NOT LOGGED IN */}
       <SignedOut>
-  <Navigate to="/sign-in" replace />
-</SignedOut>
+        <Navigate to="/sign-in" replace />
+      </SignedOut>
 
-      {/* LOGGED IN */}
       <SignedIn>
         <div
           style={{
@@ -105,7 +104,7 @@ function App() {
             </SignOutButton>
           </div>
 
-          <div style={{ width: "100%", padding: "2rem" }}>
+          <div style={{ width: "100%", padding: "2rem", boxSizing: "border-box" }}>
             <h1 style={{ textAlign: "center", color: "#000" }}>evol</h1>
             <h3 style={{ textAlign: "center", color: "#000" }}>
               Words hold words, hold words from meaning
@@ -113,22 +112,46 @@ function App() {
             <p style={{ textAlign: "center" }}>Collect words you love</p>
 
             {/* Form */}
-            <form onSubmit={handleAddWord} style={{ textAlign: "center", margin: "2rem 0" }}>
+            <form
+              onSubmit={handleAddWord}
+              style={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "0.5rem",
+                margin: "2rem 0",
+              }}
+            >
               <input
                 type="text"
                 placeholder="Word"
                 value={newWord}
                 onChange={(e) => setNewWord(e.target.value)}
-                style={{ marginRight: "0.5rem", padding: "0.5rem" }}
+                style={{
+                  padding: "0.5rem",
+                  width: isMobile ? "100%" : "auto",
+                  boxSizing: "border-box",
+                }}
               />
               <input
                 type="text"
                 placeholder="Meaning"
                 value={newMeaning}
                 onChange={(e) => setNewMeaning(e.target.value)}
-                style={{ marginRight: "0.5rem", padding: "0.5rem" }}
+                style={{
+                  padding: "0.5rem",
+                  width: isMobile ? "100%" : "auto",
+                  boxSizing: "border-box",
+                }}
               />
-              <button type="submit" style={{ padding: "0.5rem 1rem" }}>
+              <button
+                type="submit"
+                style={{
+                  padding: "0.5rem 1rem",
+                  width: isMobile ? "100%" : "auto",
+                }}
+              >
                 {newMeaning.trim() === "" ? "Search" : "Add"}
               </button>
             </form>
@@ -147,7 +170,8 @@ function App() {
                 <div
                   style={{
                     background: "#fff", color: "#000", padding: "2rem",
-                    borderRadius: "10px", width: "400px",
+                    borderRadius: "10px",
+                    width: isMobile ? "90%" : "400px",
                     maxHeight: "70vh", overflowY: "auto", textAlign: "center",
                   }}
                 >
@@ -178,8 +202,9 @@ function App() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                gap: "20px", width: "100%",
+                gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill, minmax(220px, 1fr))",
+                gap: "20px",
+                width: "100%",
               }}
             >
               {words.map((w) => (

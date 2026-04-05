@@ -2,10 +2,10 @@ function WordCard({ word, meaning, onDelete }) {
   return (
     <div
       style={{
-        width: "200px",
+        width: "100%",           // changed from 200px
         padding: "1rem",
         paddingBottom: "2rem",
-        margin: "1rem",
+        margin: "0",             // changed from 1rem
         backgroundColor: "#fff",
         border: "1px solid #ddd",
         borderRadius: "8px",
@@ -15,31 +15,28 @@ function WordCard({ word, meaning, onDelete }) {
         fontFamily: "'Courier New', Courier, monospace",
         position: "relative",
         color: "#000",
+        boxSizing: "border-box", // added
       }}
     >
-      {/* DELETE BUTTON */}
       <button
-  onClick={onDelete}
-  style={{
-    position: "absolute",
-    top: "6px",
-    right: "8px",
-    background: "transparent",   
-    border: "none",
-    color: "#333",              
-    fontSize: "18px",            
-    fontWeight: "bold",
-    cursor: "pointer",
-    lineHeight: "1",
-  }}
->
-  ×
-</button>
-
+        onClick={onDelete}
+        style={{
+          position: "absolute",
+          top: "6px",
+          right: "8px",
+          background: "transparent",
+          border: "none",
+          color: "#333",
+          fontSize: "18px",
+          fontWeight: "bold",
+          cursor: "pointer",
+          lineHeight: "1",
+        }}
+      >
+        ×
+      </button>
       <h2 style={{ margin: "0 0 0.5rem 0" }}>{word}</h2>
       <p style={{ margin: 0 }}>{meaning}</p>
-
-      {/* Bottom Polaroid strip */}
       <div
         style={{
           position: "absolute",

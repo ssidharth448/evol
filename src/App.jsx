@@ -204,10 +204,12 @@ function App() {
             {/* Cards */}
             <div
               style={{
+                
                 display: "grid",
                 gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill, minmax(220px, 1fr))",
                 gap: "20px",
                 width: "100%",
+                alignItems: "start",
               }}
             >
               {words.map((w) => (

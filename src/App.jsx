@@ -1,28 +1,40 @@
 import { useState, useEffect } from "react";
 import WordCard from "./components/WordCard";
-import { SignedIn, SignedOut, UserButton, SignOutButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, UserButton, SignOutButton, useUser } from "@clerk/clerk-react";
+import { supabase } from "./supabaseClient";
 
 function App() {
-  const [words, setWords] = useState(() => {
-    const saved = localStorage.getItem("words");
-    return saved ? JSON.parse(saved) : [];
-  });
-
+  const { user } = useUser();
+  const [words, setWords] = useState([]);
   const [newWord, setNewWord] = useState("");
   const [newMeaning, setNewMeaning] = useState("");
   const [options, setOptions] = useState([]);
   const [pendingWord, setPendingWord] = useState("");
 
+  // Fetch words from Supabase on load
   useEffect(() => {
-    localStorage.setItem("words", JSON.stringify(words));
-  }, [words]);
+    if (!user) return;
+    const fetchWords = async () => {
+      const { data, error } = await supabase
+        .from("words")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
+      if (!error) setWords(data);
+    };
+    fetchWords();
+  }, [user]);
 
   const handleAddWord = async (e) => {
     e.preventDefault();
     if (!newWord) return;
 
     if (newMeaning.trim()) {
-      setWords([...words, { word: newWord, meaning: newMeaning }]);
+      const { data, error } = await supabase
+        .from("words")
+        .insert([{ user_id: user.id, word: newWord, meaning: newMeaning }])
+        .select();
+      if (!error) setWords([...words, ...data]);
       setNewWord("");
       setNewMeaning("");
       return;
@@ -33,17 +45,14 @@ function App() {
         `https://api.dictionaryapi.dev/api/v2/entries/en/${newWord}`
       );
       const data = await res.json();
-
       const meanings =
         data[0]?.meanings?.slice(0, 5).flatMap((m) =>
           m.definitions.map((d) => d.definition)
         ) || [];
-
       if (meanings.length === 0) {
         alert("No meanings found. Enter manually.");
         return;
       }
-
       setOptions(meanings);
       setPendingWord(newWord);
     } catch (error) {
@@ -51,16 +60,20 @@ function App() {
     }
   };
 
-  const handleSelectMeaning = (meaning) => {
-    setWords([...words, { word: pendingWord, meaning }]);
+  const handleSelectMeaning = async (meaning) => {
+    const { data, error } = await supabase
+      .from("words")
+      .insert([{ user_id: user.id, word: pendingWord, meaning }])
+      .select();
+    if (!error) setWords([...words, ...data]);
     setOptions([]);
     setPendingWord("");
     setNewWord("");
   };
 
-  const handleDelete = (indexToDelete) => {
-    const updatedWords = words.filter((_, index) => index !== indexToDelete);
-    setWords(updatedWords);
+  const handleDelete = async (id) => {
+    await supabase.from("words").delete().eq("id", id);
+    setWords(words.filter((w) => w.id !== id));
   };
 
   return (
@@ -79,17 +92,16 @@ function App() {
           style={{
             width: "100%",
             minHeight: "100vh",
-            position: "relative",       
+            position: "relative",
             fontFamily: "'Courier New', Courier, monospace",
             background: "linear-gradient(135deg, rgb(251, 251, 251), rgb(231, 231, 231))",
           }}
         >
-          {/* top right profile + logout — now INSIDE the relative container */}
           <div style={{ position: "absolute", top: 20, right: 20, display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <UserButton />
             <SignOutButton redirectUrl="/sign-in">
-  <button style={{ padding: "0.3rem 0.75rem", cursor: "pointer" }}>Logout</button>
-</SignOutButton>
+              <button style={{ padding: "0.3rem 0.75rem", cursor: "pointer" }}>Logout</button>
+            </SignOutButton>
           </div>
 
           <div style={{ width: "100%", padding: "2rem" }}>
@@ -100,10 +112,7 @@ function App() {
             <p style={{ textAlign: "center" }}>Collect words you love</p>
 
             {/* Form */}
-            <form
-              onSubmit={handleAddWord}
-              style={{ textAlign: "center", margin: "2rem 0" }}
-            >
+            <form onSubmit={handleAddWord} style={{ textAlign: "center", margin: "2rem 0" }}>
               <input
                 type="text"
                 placeholder="Word"
@@ -127,28 +136,18 @@ function App() {
             {options.length > 0 && (
               <div
                 style={{
-                  position: "fixed",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
+                  position: "fixed", top: 0, left: 0,
+                  width: "100%", height: "100%",
                   backgroundColor: "rgba(0,0,0,0.5)",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
+                  display: "flex", justifyContent: "center", alignItems: "center",
                   zIndex: 1000,
                 }}
               >
                 <div
                   style={{
-                    background: "#fff",
-                    color: "#000",
-                    padding: "2rem",
-                    borderRadius: "10px",
-                    width: "400px",
-                    maxHeight: "70vh",
-                    overflowY: "auto",
-                    textAlign: "center",
+                    background: "#fff", color: "#000", padding: "2rem",
+                    borderRadius: "10px", width: "400px",
+                    maxHeight: "70vh", overflowY: "auto", textAlign: "center",
                   }}
                 >
                   <h3>Choose a meaning</h3>
@@ -157,11 +156,8 @@ function App() {
                       key={i}
                       onClick={() => handleSelectMeaning(opt)}
                       style={{
-                        padding: "0.5rem",
-                        margin: "0.5rem 0",
-                        background: "#f2f2f2",
-                        cursor: "pointer",
-                        borderRadius: "6px",
+                        padding: "0.5rem", margin: "0.5rem 0",
+                        background: "#f2f2f2", cursor: "pointer", borderRadius: "6px",
                       }}
                     >
                       {opt}
@@ -182,15 +178,14 @@ function App() {
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                gap: "20px",
-                width: "100%",
+                gap: "20px", width: "100%",
               }}
             >
-              {words.map((w, index) => (
+              {words.map((w) => (
                 <WordCard
-                  key={index}
+                  key={w.id}
                   {...w}
-                  onDelete={() => handleDelete(index)}
+                  onDelete={() => handleDelete(w.id)}
                 />
               ))}
             </div>

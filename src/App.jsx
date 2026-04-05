@@ -146,12 +146,15 @@ function App() {
                 }}
               />
               <button
-                type="submit"
-                style={{
-                  padding: "0.5rem 1rem",
-                  width: isMobile ? "100%" : "auto",
-                }}
-              >
+  type="submit"
+  style={{
+    padding: "0.5rem 1rem",
+    width: isMobile ? "100%" : "auto",
+    backgroundColor: "#1a1a1a",
+    color: "#fff",
+    boxSizing: "border-box",
+  }}
+>
                 {newMeaning.trim() === "" ? "Search" : "Add"}
               </button>
             </form>

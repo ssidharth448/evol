@@ -26,8 +26,9 @@ element={
 <h1>evol</h1>
 <p>Collect words you love</p>
 <SignIn
-routing="path"
-path="/sign-in"
+  routing="path"
+  path="/sign-in"
+  signUpUrl="/sign-up"
 />
 </div>
 </div>

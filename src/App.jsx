@@ -33,7 +33,19 @@ function App() {
   const handleAddWord = async (e) => {
     e.preventDefault();
     if (!newWord) return;
+  const { data: existingWords, error: checkError } = await supabase
+    .from("words")
+    .select("*")
+    .eq("user_id", user.id)
+    .ilike("word", newWord); // case-insensitive match
 
+if (existingWords && existingWords.length > 0) {
+  const confirmAdd = window.confirm(
+    `"${newWord}" already exists. Do you still want to add it again?`
+  );
+
+  if (!confirmAdd) return;
+}
     if (newMeaning.trim()) {
       const { data, error } = await supabase
         .from("words")
